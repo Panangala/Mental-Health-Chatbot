@@ -1,0 +1,1326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindChat - Mental Health Support</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* LOGIN SCREEN */
+        .login-screen {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .login-screen h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .login-screen p {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-login {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-login:hover {
+            background: #764ba2;
+        }
+
+        .btn-register {
+            background: #eee;
+            color: #667eea;
+        }
+
+        .btn-register:hover {
+            background: #ddd;
+        }
+
+        .message-box {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            display: none;
+        }
+
+        .success {
+            background: #efe;
+            color: #3c3;
+            display: none;
+        }
+
+        /* MAIN SCREEN */
+        .main-screen {
+            display: none;
+            width: 100%;
+            max-width: 1400px;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            min-height: 600px;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar h2 { font-size: 24px; margin-bottom: 30px; }
+
+        .user-info {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .user-info p { font-size: 12px; opacity: 0.9; }
+
+        .sidebar button {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-bottom: 10px;
+            transition: 0.3s;
+        }
+
+        .sidebar button:hover { transform: scale(1.05); }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        /* TABS */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .tab-btn {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            color: #999;
+            border-bottom: 3px solid transparent;
+            transition: 0.3s;
+        }
+
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* CHAT SCREEN */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+        }
+
+        .header h1 { color: #667eea; }
+
+        .stats {
+            display: flex;
+            gap: 30px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .chat-area {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            border: 1px solid #eee;
+            padding: 15px;
+            border-radius: 10px;
+            background: #f9f9f9;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 15px;
+            border-radius: 10px;
+            max-width: 70%;
+            word-wrap: break-word;
+            line-height: 1.4;
+        }
+
+        .message.user {
+            background: #667eea;
+            color: white;
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .message.bot {
+            background: #e0e0e0;
+            color: #333;
+            margin-right: auto;
+        }
+
+        .input-area {
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button.send {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        button.send:hover {
+            background: #764ba2;
+        }
+
+        button.send:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .spinner {
+            display: none;
+            text-align: center;
+            color: #667eea;
+            margin: 20px 0;
+        }
+
+        .spinner::after {
+            content: "⏳ Processing...";
+            font-weight: bold;
+        }
+
+        /* MOOD TRACKING */
+        .mood-box {
+            background: #f0f0f0;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .mood-label {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 10px;
+        }
+
+        .mood-display {
+            font-size: 32px;
+            margin: 10px 0;
+        }
+
+        .mood-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .emotion-btn {
+            padding: 8px 15px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: 0.3s;
+        }
+
+        .emotion-btn:hover {
+            border-color: #667eea;
+            background: #f0f0ff;
+        }
+
+        .emotion-btn.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        /* DASHBOARD */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #eee;
+        }
+
+        .chart-container h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .session-item {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .session-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .session-emotion {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .emotion-badge {
+            background: #667eea;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .improvement-indicator {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .improved {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .stable {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .declined {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .modal h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .modal-buttons button {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div class="login-screen" id="loginScreen">
+    <h1>🧠 MindChat</h1>
+    <p>Mental Health Support Chatbot</p>
+
+    <div id="loginForm">
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="loginEmail" placeholder="Enter your email">
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="loginPassword" placeholder="Enter your password">
+        </div>
+        <div class="btn-group">
+            <button class="btn-login" onclick="login()">Login</button>
+            <button class="btn-register" onclick="switchToRegister()">Register</button>
+        </div>
+        <div class="message-box error" id="loginError"></div>
+    </div>
+
+    <div id="registerForm" style="display: none;">
+        <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="registerUsername" placeholder="Choose a username">
+        </div>
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="registerEmail" placeholder="Enter your email">
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="registerPassword" placeholder="Create a password">
+        </div>
+        <div class="form-group">
+            <label>Full Name (optional)</label>
+            <input type="text" id="registerName" placeholder="Your full name">
+        </div>
+        <div class="btn-group">
+            <button class="btn-login" onclick="register()">Create Account</button>
+            <button class="btn-register" onclick="switchToLogin()">Back to Login</button>
+        </div>
+        <div class="message-box error" id="registerError"></div>
+        <div class="message-box success" id="registerSuccess"></div>
+    </div>
+</div>
+
+<!-- MAIN SCREEN -->
+<div class="main-screen" id="mainScreen">
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div>
+                <h2>🧠 MindChat</h2>
+                <div class="user-info">
+                    <p id="userEmail">User</p>
+                </div>
+                <button onclick="switchTab('chat')">💬 Chat</button>
+                <button onclick="switchTab('dashboard')">📊 Analytics</button>
+                <button onclick="logout()">🚪 Logout</button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- TABS -->
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('chat')">Chat</button>
+                <button class="tab-btn" onclick="switchTab('dashboard')">Analytics</button>
+            </div>
+
+            <!-- CHAT TAB -->
+            <div id="chat" class="tab-content active">
+                <div class="header">
+                    <h1>Chat Session</h1>
+                    <div class="stats">
+                        <div>Messages: <strong id="msgCount">0</strong></div>
+                        <div>Emotion: <strong id="emotion">-</strong></div>
+                    </div>
+                </div>
+
+                <!-- Pre-Chat Mood -->
+                <div class="mood-box">
+                    <div class="mood-label">📍 How are you feeling right now?</div>
+                    <div id="preMood" class="mood-display">😶</div>
+                    <div class="mood-buttons" id="preMoodBtns">
+                        <button class="emotion-btn" onclick="selectPreMood('sadness', '😢')">😢 Sad</button>
+                        <button class="emotion-btn" onclick="selectPreMood('anxiety', '😰')">😰 Anxious</button>
+                        <button class="emotion-btn" onclick="selectPreMood('anger', '😠')">😠 Angry</button>
+                        <button class="emotion-btn" onclick="selectPreMood('fear', '😨')">😨 Scared</button>
+                        <button class="emotion-btn" onclick="selectPreMood('joy', '😊')">😊 Happy</button>
+                        <button class="emotion-btn" onclick="selectPreMood('neutral', '😐')">😐 Neutral</button>
+                    </div>
+                </div>
+
+                <div class="chat-area" id="chatArea"></div>
+                <div class="spinner" id="spinner"></div>
+
+                <div class="input-area">
+                    <input 
+                        type="text" 
+                        id="messageInput" 
+                        placeholder="Type your message..." 
+                        disabled
+                        onkeypress="if(event.key==='Enter') sendMessage()"
+                    >
+                    <button class="send" id="sendBtn" onclick="sendMessage()" disabled>Send</button>
+                </div>
+
+                <!-- Post-Chat Mood -->
+                <div class="mood-box" style="margin-top: 20px;">
+                    <div class="mood-label">📍 How do you feel now?</div>
+                    <div id="postMood" class="mood-display">😶</div>
+                    <div class="mood-buttons" id="postMoodBtns">
+                        <button class="emotion-btn" onclick="selectPostMood('sadness', '😢')">😢 Sad</button>
+                        <button class="emotion-btn" onclick="selectPostMood('anxiety', '😰')">😰 Anxious</button>
+                        <button class="emotion-btn" onclick="selectPostMood('anger', '😠')">😠 Angry</button>
+                        <button class="emotion-btn" onclick="selectPostMood('fear', '😨')">😨 Scared</button>
+                        <button class="emotion-btn" onclick="selectPostMood('joy', '😊')">😊 Happy</button>
+                        <button class="emotion-btn" onclick="selectPostMood('neutral', '😐')">😐 Neutral</button>
+                    </div>
+                    <button class="btn-login" onclick="endSession()" style="margin-top: 15px; width: 100%;">End Session</button>
+                </div>
+            </div>
+
+            <!-- ANALYTICS TAB -->
+            <div id="dashboard" class="tab-content">
+                <h2 style="color: #667eea; margin-bottom: 20px;">Your Progress & Analytics</h2>
+
+                <!-- Stats Cards -->
+                <div class="dashboard-grid">
+                    <div class="stat-card">
+                        <h3>Total Sessions</h3>
+                        <div class="value" id="totalSessions">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Improved Sessions</h3>
+                        <div class="value" id="improvedSessions">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Average Improvement</h3>
+                        <div class="value" id="avgImprovement">0%</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Success Rate</h3>
+                        <div class="value" id="successRate">0%</div>
+                    </div>
+                </div>
+
+                <!-- Emotion Distribution Chart -->
+                <div class="chart-container">
+                    <h3>Emotions Over Time</h3>
+                    <canvas id="emotionChart"></canvas>
+                </div>
+
+                <!-- Mood Improvement Chart -->
+                <div class="chart-container">
+                    <h3>Mood Improvement by Session</h3>
+                    <canvas id="improvementChart"></canvas>
+                </div>
+
+                <!-- Session History -->
+                <div class="chart-container">
+                    <h3>Recent Sessions</h3>
+                    <div id="sessionHistory"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const API = 'http://localhost:5000';
+let token = null;
+let user = null;
+
+let sessionId = null;
+let chatSessionId = null;
+let msgCount = 0;
+let preMoodEmotion = null;
+let preMoodSentiment = 0;
+let postMoodEmotion = null;
+let postMoodSentiment = 0;
+
+const emotionScores = {
+    'sadness': -0.8,
+    'anxiety': -0.6,
+    'anger': -0.5,
+    'fear': -0.7,
+    'joy': 0.8,
+    'neutral': 0
+};
+
+console.log('=== MINDCHAT LOADED ===');
+
+// Check if already logged in
+window.addEventListener('load', () => {
+    const savedToken = localStorage.getItem('auth_token');
+    const savedUser = localStorage.getItem('current_user');
+    
+    if (savedToken && savedUser) {
+        token = savedToken;
+        user = JSON.parse(savedUser);
+        resetForNewUser();
+        showMainScreen();
+    } else {
+        showLoginScreen();
+    }
+});
+
+// ===== NAVIGATION =====
+
+function switchTab(tabName) {
+    // Hide all tabs
+    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    
+    // Show selected tab
+    document.getElementById(tabName).classList.add('active');
+    event.target.classList.add('active');
+    
+    if (tabName === 'dashboard') {
+        loadDashboard();
+    }
+}
+
+// ===== LOGIN/REGISTER =====
+
+function switchToRegister() {
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('registerForm').style.display = 'block';
+}
+
+function switchToLogin() {
+    document.getElementById('loginForm').style.display = 'block';
+    document.getElementById('registerForm').style.display = 'none';
+    document.getElementById('registerError').style.display = 'none';
+    document.getElementById('registerSuccess').style.display = 'none';
+}
+
+async function login() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value.trim();
+
+    if (!email || !password) {
+        showError('loginError', 'Please enter email and password');
+        return;
+    }
+
+    try {
+        console.log('📝 Logging in...');
+        const res = await fetch(`${API}/api/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+        console.log('Response:', data);
+
+        if (!data.success || !data.data?.token) {
+            showError('loginError', data.message || 'Login failed');
+            return;
+        }
+
+        token = data.data.token;
+        user = data.data.user;
+
+        localStorage.setItem('auth_token', token);
+        localStorage.setItem('current_user', JSON.stringify(user));
+
+        console.log('✅ Login successful, User:', user.user_id);
+        
+        // Reset UI for new user
+        resetForNewUser();
+        showMainScreen();
+
+    } catch (e) {
+        console.error('Error:', e);
+        showError('loginError', 'Connection error');
+    }
+}
+
+async function register() {
+    const username = document.getElementById('registerUsername').value.trim();
+    const email = document.getElementById('registerEmail').value.trim();
+    const password = document.getElementById('registerPassword').value.trim();
+    const name = document.getElementById('registerName').value.trim();
+
+    if (!username || !email || !password) {
+        showError('registerError', 'Please fill in all required fields');
+        return;
+    }
+
+    try {
+        console.log('📝 Registering...');
+        const res = await fetch(`${API}/api/auth/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, email, password, first_name: name })
+        });
+
+        const data = await res.json();
+        console.log('Response:', data);
+
+        if (!data.success) {
+            showError('registerError', data.message || 'Registration failed');
+            return;
+        }
+
+        showSuccess('registerSuccess', '✅ Registration successful! Please login.');
+        setTimeout(() => switchToLogin(), 2000);
+
+    } catch (e) {
+        console.error('Error:', e);
+        showError('registerError', 'Connection error');
+    }
+}
+
+function resetForNewUser() {
+    console.log('🔄 Resetting for new user...');
+    
+    // Clear session-specific variables
+    sessionId = null;
+    chatSessionId = null;
+    msgCount = 0;
+    preMoodEmotion = null;
+    preMoodSentiment = 0;
+    postMoodEmotion = null;
+    postMoodSentiment = 0;
+    
+    // Clear chat UI
+    document.getElementById('chatArea').innerHTML = '';
+    document.getElementById('messageInput').value = '';
+    document.getElementById('messageInput').disabled = true;
+    document.getElementById('sendBtn').disabled = true;
+    document.getElementById('msgCount').textContent = '0';
+    document.getElementById('emotion').textContent = '-';
+    document.getElementById('preMood').textContent = '😶';
+    document.getElementById('postMood').textContent = '😶';
+    
+    // Reset mood button selections
+    document.querySelectorAll('.emotion-btn').forEach(btn => btn.classList.remove('selected'));
+    
+    // Clear analytics
+    document.getElementById('totalSessions').textContent = '0';
+    document.getElementById('improvedSessions').textContent = '0';
+    document.getElementById('avgImprovement').textContent = '0%';
+    document.getElementById('successRate').textContent = '0%';
+    document.getElementById('sessionHistory').innerHTML = '';
+    
+    // Destroy charts if they exist
+    const emotionCtx = document.getElementById('emotionChart');
+    const improvementCtx = document.getElementById('improvementChart');
+    if (emotionCtx && emotionCtx.chart) {
+        emotionCtx.chart.destroy();
+        emotionCtx.chart = null;
+    }
+    if (improvementCtx && improvementCtx.chart) {
+        improvementCtx.chart.destroy();
+        improvementCtx.chart = null;
+    }
+}
+
+function logout() {
+    console.log('🚪 Logging out...');
+    
+    // Clear ALL global variables
+    localStorage.clear();
+    token = null;
+    user = null;
+    sessionId = null;
+    chatSessionId = null;
+    msgCount = 0;
+    preMoodEmotion = null;
+    preMoodSentiment = 0;
+    postMoodEmotion = null;
+    postMoodSentiment = 0;
+    
+    // Clear all UI
+    document.getElementById('chatArea').innerHTML = '';
+    document.getElementById('messageInput').value = '';
+    document.getElementById('msgCount').textContent = '0';
+    document.getElementById('emotion').textContent = '-';
+    document.getElementById('preMood').textContent = '😶';
+    document.getElementById('postMood').textContent = '😶';
+    
+    // Reset mood button selections
+    document.querySelectorAll('.emotion-btn').forEach(btn => btn.classList.remove('selected'));
+    
+    // Clear analytics
+    document.getElementById('totalSessions').textContent = '0';
+    document.getElementById('improvedSessions').textContent = '0';
+    document.getElementById('avgImprovement').textContent = '0%';
+    document.getElementById('successRate').textContent = '0%';
+    document.getElementById('sessionHistory').innerHTML = '';
+    
+    // Destroy charts
+    const emotionCtx = document.getElementById('emotionChart');
+    const improvementCtx = document.getElementById('improvementChart');
+    if (emotionCtx && emotionCtx.chart) {
+        emotionCtx.chart.destroy();
+        emotionCtx.chart = null;
+    }
+    if (improvementCtx && improvementCtx.chart) {
+        improvementCtx.chart.destroy();
+        improvementCtx.chart = null;
+    }
+    
+    // Clear form fields
+    document.getElementById('loginEmail').value = '';
+    document.getElementById('loginPassword').value = '';
+    document.getElementById('loginError').style.display = 'none';
+    
+    // Clear register form
+    document.getElementById('registerUsername').value = '';
+    document.getElementById('registerEmail').value = '';
+    document.getElementById('registerPassword').value = '';
+    document.getElementById('registerName').value = '';
+    document.getElementById('registerError').style.display = 'none';
+    document.getElementById('registerSuccess').style.display = 'none';
+    
+    showLoginScreen();
+}
+
+// ===== MOOD TRACKING =====
+
+function selectPreMood(emotion, emoji) {
+    preMoodEmotion = emotion;
+    preMoodSentiment = emotionScores[emotion];
+    document.getElementById('preMood').textContent = emoji;
+    
+    // Update button styles
+    document.querySelectorAll('#preMoodBtns .emotion-btn').forEach(btn => btn.classList.remove('selected'));
+    event.target.classList.add('selected');
+    
+    // Start chat session with pre-mood
+    startChatSession();
+}
+
+function selectPostMood(emotion, emoji) {
+    postMoodEmotion = emotion;
+    postMoodSentiment = emotionScores[emotion];
+    document.getElementById('postMood').textContent = emoji;
+    
+    // Update button styles
+    document.querySelectorAll('#postMoodBtns .emotion-btn').forEach(btn => btn.classList.remove('selected'));
+    event.target.classList.add('selected');
+}
+
+async function startChatSession() {
+    try {
+        if (!preMoodEmotion) {
+            alert('Please select your current mood first');
+            return;
+        }
+
+        const res = await fetch(`${API}/api/chat/session/start`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                emotion: preMoodEmotion,
+                sentiment_score: preMoodSentiment
+            })
+        });
+
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+
+        chatSessionId = data.session_id;
+        console.log('✓ Chat session started:', chatSessionId, 'for user:', user.user_id);
+
+        document.getElementById('chatArea').innerHTML = '';
+        document.getElementById('messageInput').disabled = false;
+        document.getElementById('sendBtn').disabled = false;
+        document.getElementById('msgCount').textContent = '0';
+        msgCount = 0;
+        
+        addBotMessage('Hello! I\'m here to listen. How are you feeling today?');
+
+    } catch (e) {
+        console.error('Error:', e);
+        alert('Error: ' + e.message);
+    }
+}
+
+async function endSession() {
+    try {
+        if (!postMoodEmotion) {
+            alert('Please select your mood after chat first');
+            return;
+        }
+
+        if (!chatSessionId) {
+            alert('No active session');
+            return;
+        }
+
+        const res = await fetch(`${API}/api/chat/session/end/${chatSessionId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                emotion: postMoodEmotion,
+                sentiment_score: postMoodSentiment
+            })
+        });
+
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+
+        const improvement = data.improvement;
+        let message = '';
+        if (improvement.improved) {
+            message = `✨ Great! Your mood improved by ${(improvement.improvement * 100).toFixed(0)}%!`;
+        } else if (improvement.stable) {
+            message = '✓ Your mood stayed stable. Keep taking care of yourself!';
+        } else {
+            message = 'Keep working on it. Healing takes time.';
+        }
+
+        alert(message);
+        
+        // Reset mood tracking
+        document.getElementById('preMood').textContent = '😶';
+        document.getElementById('postMood').textContent = '😶';
+        preMoodEmotion = null;
+        postMoodEmotion = null;
+        chatSessionId = null;
+        msgCount = 0;
+        document.getElementById('chatArea').innerHTML = '';
+        document.getElementById('messageInput').value = '';
+        document.getElementById('messageInput').disabled = true;
+        document.getElementById('sendBtn').disabled = true;
+
+    } catch (e) {
+        console.error('Error:', e);
+        alert('Error: ' + e.message);
+    }
+}
+
+// ===== CHAT =====
+
+async function sendMessage() {
+    const msg = document.getElementById('messageInput').value.trim();
+    if (!msg || !chatSessionId || !user) return;
+
+    console.log('📤 Sending message for user:', user.user_id, 'Session:', chatSessionId);
+
+    addUserMessage(msg);
+    document.getElementById('messageInput').value = '';
+    document.getElementById('sendBtn').disabled = true;
+    document.getElementById('spinner').style.display = 'block';
+
+    try {
+        const res = await fetch(`${API}/api/chat/message`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                session_id: chatSessionId,
+                message: msg
+            })
+        });
+
+        console.log('Response status:', res.status);
+
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.error || `HTTP ${res.status}`);
+        }
+
+        const data = await res.json();
+        console.log('📥 Response:', data);
+
+        if (!data.success) {
+            throw new Error(data.error || 'Request failed');
+        }
+
+        if (!data.response) {
+            throw new Error('No response from chatbot');
+        }
+
+        addBotMessage(data.response);
+
+        msgCount++;
+        document.getElementById('msgCount').textContent = msgCount;
+
+        if (data.analysis?.primary_emotion) {
+            document.getElementById('emotion').textContent = data.analysis.primary_emotion;
+        }
+
+    } catch (e) {
+        console.error('❌ Error:', e);
+        addBotMessage(`❌ Error: ${e.message}`);
+    } finally {
+        document.getElementById('spinner').style.display = 'none';
+        document.getElementById('sendBtn').disabled = false;
+        document.getElementById('messageInput').focus();
+    }
+}
+
+// ===== DASHBOARD =====
+
+async function loadDashboard() {
+    try {
+        if (!user) {
+            console.error('No user logged in');
+            return;
+        }
+
+        console.log('Loading dashboard for user:', user.user_id);
+
+        // Load improvement stats
+        const statsRes = await fetch(`${API}/api/user/${user.user_id}/improvement-stats`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        const statsData = await statsRes.json();
+        
+        if (statsData.success && statsData.stats) {
+            const stats = statsData.stats;
+            document.getElementById('totalSessions').textContent = stats.total_sessions;
+            document.getElementById('improvedSessions').textContent = stats.sessions_improved;
+            document.getElementById('avgImprovement').textContent = (stats.average_improvement * 100).toFixed(0) + '%';
+            document.getElementById('successRate').textContent = Math.round(stats.improvement_rate) + '%';
+        }
+
+        // Load sessions
+        const sessionsRes = await fetch(`${API}/api/user/${user.user_id}/sessions?limit=20`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        const sessionsData = await sessionsRes.json();
+        
+        if (sessionsData.success && sessionsData.sessions.length > 0) {
+            displaySessions(sessionsData.sessions);
+            createImprovementChart(sessionsData.sessions);
+        }
+
+        // Load mood trends
+        const trendsRes = await fetch(`${API}/api/user/${user.user_id}/mood-trends?limit=30`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        const trendsData = await trendsRes.json();
+        
+        if (trendsData.success) {
+            createEmotionChart(trendsData.trends);
+        }
+
+    } catch (e) {
+        console.error('Error loading dashboard:', e);
+    }
+}
+
+function displaySessions(sessions) {
+    let html = '';
+    
+    sessions.forEach(session => {
+        const startDate = new Date(session.session_start).toLocaleDateString();
+        const improvement = session.mood_improvement;
+        let status = '';
+        let statusClass = '';
+
+        if (improvement > 0.1) {
+            status = `✨ Improved +${(improvement * 100).toFixed(0)}%`;
+            statusClass = 'improved';
+        } else if (improvement < -0.1) {
+            status = `⬇️ Declined ${(improvement * 100).toFixed(0)}%`;
+            statusClass = 'declined';
+        } else {
+            status = '→ Stable';
+            statusClass = 'stable';
+        }
+
+        html += `
+            <div class="session-item">
+                <div class="session-header">
+                    <div class="session-emotion">
+                        <span class="emotion-badge">${session.initial_emotion}</span>
+                        →
+                        <span class="emotion-badge">${session.final_emotion}</span>
+                    </div>
+                    <span class="improvement-indicator ${statusClass}">${status}</span>
+                </div>
+                <div style="font-size: 12px; color: #666;">
+                    ${startDate}
+                </div>
+            </div>
+        `;
+    });
+
+    document.getElementById('sessionHistory').innerHTML = html || '<p>No sessions yet</p>';
+}
+
+function createEmotionChart(trends) {
+    if (!trends || trends.length === 0) return;
+
+    const emotions = {};
+    trends.forEach(trend => {
+        emotions[trend.emotion] = (emotions[trend.emotion] || 0) + 1;
+    });
+
+    const ctx = document.getElementById('emotionChart');
+    if (ctx.chart) ctx.chart.destroy();
+
+    ctx.chart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(emotions),
+            datasets: [{
+                data: Object.values(emotions),
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+}
+
+function createImprovementChart(sessions) {
+    const improvements = sessions.map(s => s.mood_improvement * 100).reverse();
+    const labels = sessions.map((_, i) => `Session ${i + 1}`).reverse();
+
+    const ctx = document.getElementById('improvementChart');
+    if (ctx.chart) ctx.chart.destroy();
+
+    ctx.chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Mood Improvement (%)',
+                data: improvements,
+                borderColor: '#667eea',
+                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// ===== UI HELPERS =====
+
+function showLoginScreen() {
+    document.getElementById('loginScreen').style.display = 'block';
+    document.getElementById('mainScreen').style.display = 'none';
+}
+
+function showMainScreen() {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainScreen').style.display = 'block';
+    if (user) {
+        document.getElementById('userEmail').textContent = user.email;
+    }
+}
+
+function addUserMessage(text) {
+    const div = document.createElement('div');
+    div.className = 'message user';
+    div.textContent = text;
+    document.getElementById('chatArea').appendChild(div);
+    scroll();
+}
+
+function addBotMessage(text) {
+    const div = document.createElement('div');
+    div.className = 'message bot';
+    div.textContent = text;
+    document.getElementById('chatArea').appendChild(div);
+    scroll();
+}
+
+function scroll() {
+    const area = document.getElementById('chatArea');
+    setTimeout(() => area.scrollTop = area.scrollHeight, 50);
+}
+
+function showError(elementId, message) {
+    const el = document.getElementById(elementId);
+    el.textContent = '❌ ' + message;
+    el.style.display = 'block';
+}
+
+function showSuccess(elementId, message) {
+    const el = document.getElementById(elementId);
+    el.textContent = message;
+    el.style.display = 'block';
+}
+
+console.log('✅ MindChat Ready!');
+</script>
+
+</body>
+</html>
